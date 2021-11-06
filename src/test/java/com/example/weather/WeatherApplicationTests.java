@@ -7,34 +7,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 
-import com.example.weather.helper.CityHelper;
-import com.example.weather.helper.CountyHelper;
-import com.example.weather.helper.ProvinceHelper;
-import com.example.weather.helper.WeatherHelper;
+import com.example.weather.helper.HttpHelper;
 
 @SpringBootTest
 class WeatherApplicationTests {
 	@Autowired
-	ProvinceHelper provinceHelper;
-	@Autowired
-	CityHelper cityHelper;
-	@Autowired
-	CountyHelper countyHelper;
-	@Autowired
-	WeatherHelper weatherHelper;
+	HttpHelper httpHelper;
 	@Test
 	void provinceCodeTest() {
-		Optional<String> code = provinceHelper.getCode("江苏");
+		Optional<String> code = httpHelper.getProvinceCode("江苏");
 		Assert.isTrue("10119".equals(code.get()), "获取成功");
 	}
 	@Test
 	void cityCodeTest() {
-		Optional<String> code = cityHelper.getCode("10119","苏州");
+		Optional<String> code = httpHelper.getCityCode("10119","苏州");
 		Assert.isTrue("04".equals(code.get()), "获取成功");
 	}
 	@Test
 	void countyCodeTest() {
-		Optional<String> code = countyHelper.getCode("10119","04","吴江");
+		Optional<String> code = httpHelper.getCountyCode("10119","04","吴江");
 		Assert.isTrue("07".equals(code.get()), "获取成功");
 	}
 	@Test
@@ -42,7 +33,7 @@ class WeatherApplicationTests {
 		String province = "10119";
 		String city = "04";
 		String county = "07";
-		Optional<Integer> temperature = weatherHelper.getTemperature(province,city,county);
+		Optional<Integer> temperature = httpHelper.getTemperature(province,city,county);
 		Assert.isTrue(temperature.isPresent(), "获取成功");
 	}
 }
