@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.retry.RetryCallback;
@@ -87,12 +86,25 @@ public class HttpHelper {
 	        headers.set("Accept", "application/json");
 	        HttpEntity entity = new HttpEntity(headers);
 	        Map<String, String> params = new HashMap<String, String>();
-			ParameterizedTypeReference<Map<String,WeatherInfo>> responseType = new ParameterizedTypeReference<Map<String,WeatherInfo>>() {};
+//			ParameterizedTypeReference<Map<String,WeatherInfo>> responseType = new ParameterizedTypeReference<Map<String,WeatherInfo>>() {};
 			String fullCode = new StringBuilder().append(province).append(city).append(county).toString();
-			
-	        ResponseEntity<Map<String,WeatherInfo>> resp = restTemplate.exchange(weatherPrefix+fullCode+".html", HttpMethod.GET, entity, responseType,params);
-	        Map<String,WeatherInfo> responseBody = resp.getBody();
-	        WeatherInfo jsonBody = responseBody.get("weatherinfo");
+			ResponseEntity<Map<String,String>> resp=null;
+			restTemplate.getMessageConverters().set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+			String url = weatherPrefix+fullCode+".html";
+			String respBody = retryTemplate.execute(new RetryCallback<String, Exception>() {
+				@Override
+				public String doWithRetry(RetryContext arg0) throws Exception {
+					ResponseEntity<String> respEntity = restTemplate.getForEntity(url, String.class,params);
+					return respEntity.getBody();
+				}
+	        });
+			if(respBody.indexOf("!DOCTYPE HTML")>0) {
+				logger.warn("{}，网页无法访问",url);
+				return Optional.ofNullable(null);
+			}
+			ObjectMapper mapper = new ObjectMapper();
+	        Map<String,WeatherInfo> responseMap =mapper.readValue(respBody, new TypeReference<Map<String,WeatherInfo>>(){});
+	        WeatherInfo jsonBody = responseMap.get("weatherinfo");
 	        if(ObjectUtils.isEmpty(jsonBody)) {
 	        	logger.warn("接口没有返回weatherinfo域，{}",fullCode);
 	        	return Optional.ofNullable(null);
@@ -107,8 +119,8 @@ public class HttpHelper {
 		return Optional.ofNullable(null);
 		
 	}
-	private Optional<String> getProvinceEntity(String provinceName) {
-		try {
+//	private Optional<String> getProvinceEntity(String provinceName) {
+//		try {
 //			HttpHeaders headers = new HttpHeaders();
 //	        headers.set("Accept", "application/json");
 //	        HttpEntity entity = new HttpEntity(headers);
@@ -121,11 +133,11 @@ public class HttpHelper {
 //			if(result.isPresent()) {
 //				return Optional.of(result.get().getName());
 //			}
-		}catch(Exception ex) {
-			logger.error("获取省份编码异常,{}",provinceName,ex);
-		}
-	
-		return Optional.ofNullable(null);
-	
-	}
+//		}catch(Exception ex) {
+//			logger.error("获取省份编码异常,{}",provinceName,ex);
+//		}
+//	
+//		return Optional.ofNullable(null);
+//	
+//	}
 }
