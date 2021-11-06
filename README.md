@@ -2,7 +2,7 @@
 get weather info from weather.com
 
 
-no connection retry mechanism!
+use spring-retry  mechanism!
 
 no TPS limit!
 
