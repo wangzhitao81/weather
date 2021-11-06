@@ -2,6 +2,7 @@ package com.example.weather.config;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -13,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class Config {
+	@Value("${retry.maxAttempts}")
+	int maxAttempts;
 	@Bean
     public RetryTemplate simpleRetryTemplate() {
         RetryTemplate retryTemplate = new RetryTemplate();
@@ -20,7 +23,7 @@ public class Config {
 //        maps.put(TimeoutException.class, true);
 //        maps.put(UnknownHostException.class, true);
 //        SimpleRetryPolicy simpleRetryPolicy = new SimpleRetryPolicy(10, maps);
-        SimpleRetryPolicy simpleRetryPolicy = new SimpleRetryPolicy(10);
+        SimpleRetryPolicy simpleRetryPolicy = new SimpleRetryPolicy(maxAttempts);
         retryTemplate.setRetryPolicy(simpleRetryPolicy);
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
         backOffPolicy.setInitialInterval(30000);
