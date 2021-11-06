@@ -1,9 +1,7 @@
 # weather
 get weather info from weather.com
 
-
 use spring-retry  mechanism!
 
-no TPS limit!
+has TPS limit!
 
-no code optimization!
