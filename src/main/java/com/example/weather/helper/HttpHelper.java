@@ -9,9 +9,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.retry.RetryCallback;
@@ -39,12 +36,7 @@ public class HttpHelper {
 	
 	public Optional<String> getCode(String name,String url) {
 		try {
-			HttpHeaders headers = new HttpHeaders();
-	        headers.set("Accept", "text/html");
-	        HttpEntity entity = new HttpEntity(headers);
 	        Map<String, String> params = new HashMap<String, String>();
-			ParameterizedTypeReference<Map<String,String>> responseType = new ParameterizedTypeReference<Map<String,String>>() {};
-			ResponseEntity<Map<String,String>> resp=null;
 			restTemplate.getMessageConverters().set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 			String respBody = retryTemplate.execute(new RetryCallback<String, Exception>() {
 				@Override
@@ -82,13 +74,9 @@ public class HttpHelper {
 	}
 	public Optional<Integer> getTemperature(String province, String city, String county) {
 		try {
-			HttpHeaders headers = new HttpHeaders();
-	        headers.set("Accept", "application/json");
-	        HttpEntity entity = new HttpEntity(headers);
 	        Map<String, String> params = new HashMap<String, String>();
 //			ParameterizedTypeReference<Map<String,WeatherInfo>> responseType = new ParameterizedTypeReference<Map<String,WeatherInfo>>() {};
 			String fullCode = new StringBuilder().append(province).append(city).append(county).toString();
-			ResponseEntity<Map<String,String>> resp=null;
 			restTemplate.getMessageConverters().set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 			String url = weatherPrefix+fullCode+".html";
 			String respBody = retryTemplate.execute(new RetryCallback<String, Exception>() {
@@ -119,25 +107,4 @@ public class HttpHelper {
 		return Optional.ofNullable(null);
 		
 	}
-//	private Optional<String> getProvinceEntity(String provinceName) {
-//		try {
-//			HttpHeaders headers = new HttpHeaders();
-//	        headers.set("Accept", "application/json");
-//	        HttpEntity entity = new HttpEntity(headers);
-//	        Map<String, String> params = new HashMap<String, String>();
-//			ParameterizedTypeReference<List<ProvinceEntiy>> responseType = new ParameterizedTypeReference<List<ProvinceEntiy>>() {};
-//	        ResponseEntity<List<ProvinceEntiy>> resp = restTemplate.exchange(url, HttpMethod.GET, entity, responseType,params);
-//	//		Map<String,String> responseMap = (Map<String, String>) restTemplate.getForEntity(url, ProvinceEntity.class);
-//	        List<ProvinceEntiy> list = resp.getBody();
-//	        Optional<ProvinceEntiy> result = list.stream().filter(entry -> entry.getName().equals(provinceName)).findFirst();
-//			if(result.isPresent()) {
-//				return Optional.of(result.get().getName());
-//			}
-//		}catch(Exception ex) {
-//			logger.error("获取省份编码异常,{}",provinceName,ex);
-//		}
-//	
-//		return Optional.ofNullable(null);
-//	
-//	}
 }
